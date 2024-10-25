@@ -1,7 +1,8 @@
 package de.brabender.gdw.campusfit.controllers
 
-import de.brabender.gdw.campusfit.models.SportMeeting.SportMeeting
-import de.brabender.gdw.campusfit.models.SportMeeting.SportMeetingRepository
+import de.brabender.gdw.campusfit.models.SportMeeting
+import de.brabender.gdw.campusfit.repositories.SportMeetingRepository
+import de.brabender.gdw.campusfit.service.SportMeetingService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
@@ -9,47 +10,47 @@ import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @Controller
-class SportMeetingsController {
+class SportMeetingsController(private val sportMeetingService: SportMeetingService) {
 
-    @Autowired
-    lateinit var sportMeetingsRepository: SportMeetingRepository
+
 
     @RequestMapping("/sportmeetings")
     @ResponseBody
     @ResponseStatus(HttpStatus.CREATED)
-    fun sportmeetings(name: String, place: String, date: String) {
+    fun sportmeetings(name: String , place: String, date: String) {
         val sportMeeting = SportMeeting()
         sportMeeting.name = name
         sportMeeting.place = place
         sportMeeting.date = date
-        sportMeetingsRepository.save(sportMeeting)
+        sportMeetingService.save(sportMeeting)
     }
 
     @GetMapping("/sportmeetings")
     @ResponseBody
-    fun getSportMeetings() {
-
-        sportMeetingsRepository.findAll().forEach {
-            it.toString()
-        }
+    fun getSportMeetings(): String {
+        val sportMeetings = sportMeetingService.getAll()
+        return sportMeetings.joinToString(",")
     }
 
     @GetMapping("/sportmeetings/{id}")
     @ResponseBody
     fun getSportMeetingById(@PathVariable("id") id: UUID): String {
-        val optionalSportMeeting = sportMeetingsRepository.findById(id)
-        val sportMeeting = optionalSportMeeting.get()
-        return sportMeeting.name
+        val sportMeeting: SportMeeting? = sportMeetingService.getById(id)
+        return sportMeeting!!.name
     }
 
     @PutMapping("/sportmeetings/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun updateSportMeeting(@PathVariable("id") id: UUID, name: String, place: String, date: String) {
-        val sportMeeting = sportMeetingsRepository.findById(id)
-        sportMeeting.get().name = name
-        sportMeeting.get().place = place
-        sportMeeting.get().date = date
-        sportMeetingsRepository.save(sportMeeting.get())
+        val sportMeeting: SportMeeting? = sportMeetingService.getById(id)
+        sportMeeting!!.name = name
+        sportMeeting.place = place
+        sportMeeting.date = date
+    }
 
+    @DeleteMapping("/sportmeetings/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteSportMeetingById(@PathVariable("id") id: UUID) {
+        sportMeetingService.deleteById(id)
     }
 }
