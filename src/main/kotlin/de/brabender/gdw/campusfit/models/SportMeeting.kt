@@ -12,7 +12,7 @@ class SportMeeting {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: UUID? = null
-    val open: Boolean = true
+    val isInDoor: Boolean = true
     var name: String = ""
     var place: String = ""
     var date: String = ""
